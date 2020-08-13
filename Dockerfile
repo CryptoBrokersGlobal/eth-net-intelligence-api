@@ -53,13 +53,25 @@ RUN cd /home/ethnetintel &&\
     npm install &&\
     npm install -g pm2
 
-RUN echo '#!/bin/bash\nset -e\n\ncd /home/ethnetintel/eth-net-intelligence-api\npm2 start ./app.json\ntail -f \
-    /home/ethnetintel/.pm2/logs/node-app-out-0.log' > /home/ethnetintel/startscript.sh
+RUN echo '#!/bin/bash\nset -e\n\ncd /home/ethnetintel/eth-net-intelligence-api\npm2 start ./app.json\n sleep 5 \n\ntail \
+    /home/ethnetintel/.pm2/logs/node-app-out-0.log \n\n export WS_SECRET=mysecret && npm start --prefix /home/eth-netstats' > /home/ethnetintel/startscript.sh
 
-RUN chmod +x /home/ethnetintel/startscript.sh &&\
-    chown -R ethnetintel. /home/ethnetintel
 	
 COPY app.json /home/ethnetintel/eth-net-intelligence-api/app.json
+
+
+RUN cd /home &&\ 
+    git clone https://github.com/cubedro/eth-netstats.git &&\
+   cd eth-netstats &&\
+   npm install && \
+   npm install -g grunt &&\
+   grunt all
+   
+
+RUN chmod +x /home/ethnetintel/startscript.sh &&\
+    chown -R ethnetintel. /home/ethnetintel &&\
+	 chown -R ethnetintel. /home/eth-netstats 
+   
 
 USER ethnetintel
 ENTRYPOINT ["/home/ethnetintel/startscript.sh"]
